@@ -2,6 +2,10 @@
 __pycache__/
 *.py[cod]
 
+# Eclipse
+.project
+.pydevproject
+
 # C extensions
 *.so
 

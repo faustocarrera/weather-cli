@@ -1,0 +1,2 @@
+tabletext>=0.1
+nose>=1.3

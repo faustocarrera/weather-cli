@@ -33,6 +33,7 @@ Just update the config/wheather.conf file with your Forecast.io API key and you 
 ## Try it
 
 * git clone git@github.com:faustocarrera/weather-cli.git
+* download and gunzip the [GeoLite2 City MaxMin DB](http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz) copy it to the database folder
 * update the config/wheather.conf file with your Forecast.io API key
 * virtualenv env
 * source env/bin/activate

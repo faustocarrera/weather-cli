@@ -6,7 +6,7 @@ import sys
 import ConfigParser
 import argparse
 import requests
-import geoip2.database
+from geoip import geolite2
 import json
 import datetime
 from tabletext import to_text
@@ -14,14 +14,14 @@ from tabletext import to_text
 
 def get_ip(ip_url):
     "check the external ip"
-    result = {'status': 'ok', 'ip': 0}
+    result = 0
     try:
         headers = {'Content-type': 'application/json'}
         req = requests.get(
             ip_url,
             headers=headers,
         )
-        result['ip'] = req.text
+        result = req.text
     except Exception, error:
         sys.exit(error)
     return result
@@ -29,18 +29,13 @@ def get_ip(ip_url):
 
 def get_geolocation(ipaddress):
     "check latitude and longitude of the ip"
-    result = {'status': 'ok', 'lat': 0, 'lon': 0}
-    reader = geoip2.database.Reader('./database/GeoLite2-City.mmdb')
-    response = reader.city(ipaddress)
+    result = {'lat': 0, ' lon': 0}
     try:
-        result['city'] = str(response.city.name)
-        result['lat'] = float(response.location.latitude)
-        result['lon'] = float(response.location.longitude)
+        match = geolite2.lookup(ipaddress)
+        result['lat'] = float(match.location[0])
+        result['lon'] = float(match.location[1])
     except ValueError as error:
-        sys.exit(error[0])
-    except geoip2.errors.AddressNotFoundError as error:
-        sys.exit(error[0])
-    reader.close()
+        sys.exit(error)
     return result
 
 
@@ -142,7 +137,7 @@ def arguments():
     parser = argparse.ArgumentParser(
         prog=sys.argv[0], description='How is outside? Use the weather cli to figure it out.')
     parser.add_argument(
-        '--weather', required=True, type=str, help='What you want to know?', default='now', choices=['now', 'hourly', 'forecast'])
+        '--weather', required=False, type=str, help='What you want to know?', default='now', choices=['now', 'hourly', 'forecast'])
     parsed_args = parser.parse_args()
     return parsed_args
 
@@ -151,7 +146,7 @@ def main():
     args = arguments()
     config = load_config()
     ip = get_ip(config['ip']['url'])
-    geo = get_geolocation(ip['ip'])
+    geo = get_geolocation(ip)
     weather = get_weather(config['forecast'], geo)
     output(weather, args.weather)
 

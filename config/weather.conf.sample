@@ -1,0 +1,6 @@
+[forecast]
+url = https://api.forecast.io/forecast
+key = your_forecast_io_key
+
+[ip]
+url = http://ipecho.net/plain

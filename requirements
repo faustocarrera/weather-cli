@@ -1,0 +1,4 @@
+requests>=2.4
+maxminddb>=1.1
+geoip2>=2.2
+tabletext>=0.1

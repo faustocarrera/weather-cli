@@ -1,3 +1,6 @@
+# Project
+config/weather.conf
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

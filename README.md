@@ -6,25 +6,24 @@ Basically the script checks your ip, geolocate the ip and checks the weather bas
 
 ## Data sources
 
-[Forecast.io](https://developer.forecast.io/)   
-[GeoLite2 Free download](https://dev.maxmind.com/geoip/geoip2/geolite2/)  
+[Forecast.io](https://developer.forecast.io/)  
 [GeoLite2 City MaxMin DB](http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz)
 
 
 ## Requirements
 
 * [requests](http://docs.python-requests.org/en/latest/) >= 2.4
-* [maxminddb](https://github.com/maxmind/libmaxminddb) >= 1.1
-* [geoip2](https://pypi.python.org/pypi/geoip2) >= 2.2
+* [python-geoip](https://pythonhosted.org/python-geoip/) >= 2.2
+* [python-geoip-geolite2](https://pypi.python.org/pypi/python-geoip-geolite2) >= 2015.303
 * [tabletext](https://github.com/Thibauth/tabletext) >= 0.1
 
 Install requirements  
 
 ```python
-pip install -r requirements.txt
+pip install -r requirements
 ```
 
-You gonna need a Forecast.io API key, register [here](https://developer.forecast.io/) to obtain it
+You gonna need a Forecast.io API key, register [here](https://developer.forecast.io/) to obtain it. You have 999 API calls per day for free, enough to check the weather a couple of times a day.
 
 ## Configuration
 
@@ -33,16 +32,29 @@ Just update the config/wheather.conf file with your Forecast.io API key and you 
 ## Try it
 
 * git clone git@github.com:faustocarrera/weather-cli.git
-* download and gunzip the [GeoLite2 City MaxMin DB](http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz) copy it to the database folder
 * update the config/wheather.conf file with your Forecast.io API key
 * virtualenv env
 * source env/bin/activate
-* pip install -r requirements.txt
+* pip install -r requirements
 * python weather.py
 * profit
+
+## Usage
+
+```python
+python weather.py --weather [OPTION]
+```
+
+now: default action for current weather  
+hourly: weather for the next 12 hours
+forecast: forecast for the next 8 days 
 
 ## Todo
 
 * ~~add option for just current weather~~
 * ~~add option for next 12 hours forecast~~
-* ~~add option for next days forecast~~
+* ~~add option for next 8 days forecast~
+* ~~set now as default weather option~~
+* add option to include my own latitude and longitude to config file
+* add autoconfiguration
+* add to pipy for easy setup

@@ -6,8 +6,8 @@ Basically the script checks your ip, geolocate the ip and checks the weather bas
 
 ## Data sources
 
-[Forecast.io](https://developer.forecast.io/)  
-[GeoLite2 City MaxMin DB](http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz)
+* [Forecast.io](https://developer.forecast.io/)
+* [GeoLite2 City MaxMin DB](http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz)
 
 
 ## Requirements
@@ -17,7 +17,7 @@ Basically the script checks your ip, geolocate the ip and checks the weather bas
 * [python-geoip-geolite2](https://pypi.python.org/pypi/python-geoip-geolite2) >= 2015.303
 * [tabletext](https://github.com/Thibauth/tabletext) >= 0.1
 
-Install requirements  
+Install requirements
 
 ```python
 pip install -r requirements
@@ -45,16 +45,17 @@ Just update the config/wheather.conf file with your Forecast.io API key and you 
 python weather.py --weather [OPTION]
 ```
 
-now: default action for current weather  
+now: default action for current weather
 hourly: weather for the next 12 hours
-forecast: forecast for the next 8 days 
+forecast: forecast for the next 8 days
 
 ## Todo
 
 * ~~add option for just current weather~~
 * ~~add option for next 12 hours forecast~~
-* ~~add option for next 8 days forecast~
+* ~~add option for next 8 days forecast~~
 * ~~set now as default weather option~~
-* add option to include my own latitude and longitude to config file
+* ~~add option to include my own latitude and longitude to config file~~
 * add autoconfiguration
 * add to pipy for easy setup
+

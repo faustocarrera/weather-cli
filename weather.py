@@ -11,14 +11,17 @@ import json
 import datetime
 from tabletext import to_text
 
+IP_URL = 'http://ipecho.net/plain'
+FORECAST_URL = 'https://api.forecast.io/forecast'
 
-def get_ip(ip_url):
+
+def get_ip():
     "check the external ip"
     result = 0
     try:
         headers = {'Content-type': 'application/json'}
         req = requests.get(
-            ip_url,
+            IP_URL,
             headers=headers,
         )
         result = req.text
@@ -41,8 +44,11 @@ def get_geolocation(ipaddress):
 
 def get_weather(config, geolocation):
     "request weather based on the location"
+    # check config key
+    if config['key'] == '':
+        sys.exit('You have to provide a Forecast.io API key')
     forecast_url = '%s/%s/%s,%s/%s' % (
-        config['url'],
+        FORECAST_URL,
         config['key'],
         geolocation['lat'],
         geolocation['lon'],
@@ -122,11 +128,11 @@ def load_config():
     config_parser.read(filename)
     config = {
         'forecast': {
-            'url': config_parser.get('forecast', 'url'),
-            'key': config_parser.get('forecast', 'key')
+            'key': config_parser.get('forecast', 'key'),
         },
-        'ip': {
-            'url': config_parser.get('ip', 'url')
+        'geolocation': {
+            'lat': config_parser.get('forecast', 'latitude'),
+            'lon': config_parser.get('forecast', 'longitude'),
         }
     }
     return config
@@ -145,8 +151,12 @@ def arguments():
 def main():
     args = arguments()
     config = load_config()
-    ip = get_ip(config['ip']['url'])
-    geo = get_geolocation(ip)
+    # check if we have a lat and long defined on the config
+    if config['geolocation']['lat'] == '' and config['geolocation']['lon'] == '':
+        ip = get_ip()
+        geo = get_geolocation(ip)
+    else:
+        geo = config['geolocation']
     weather = get_weather(config['forecast'], geo)
     output(weather, args.weather)
 

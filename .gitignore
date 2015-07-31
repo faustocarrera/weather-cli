@@ -1,5 +1,6 @@
 # Project
 config/weather.conf
+database/GeoLite2-City.mmdb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

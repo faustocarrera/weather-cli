@@ -43,6 +43,6 @@ Just update the config/wheather.conf file with your Forecast.io API key and you 
 
 ## Todo
 
-* add option for just current weather
-* add option for next 12 hours forecast
-* add option for next days forecast
+* ~~add option for just current weather~~
+* ~~add option for next 12 hours forecast~~
+* ~~add option for next days forecast~~

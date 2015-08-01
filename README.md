@@ -27,7 +27,18 @@ You gonna need a Forecast.io API key, register [here](https://developer.forecast
 
 ## Configuration
 
-Just update the config/wheather.conf file with your Forecast.io API key and you are ready.
+Just create the config/wheather.conf file and add your Forecast.io API key and you are ready.  
+
+You could add the latitude and logitude of the city you want to check the weather, just found the data on [travelmath.com](http://www.travelmath.com/)  
+
+If you leave both numbers empty, the script will try to check your location based on your IP.
+
+```python
+[forecast]
+key = your_forecast_io_api_key
+latitude = 55.7522222
+longitude = 37.6155556
+```
 
 ## Try it
 
@@ -45,9 +56,9 @@ Just update the config/wheather.conf file with your Forecast.io API key and you 
 python weather.py --weather [OPTION]
 ```
 
-now: default action for current weather
-hourly: weather for the next 12 hours
-forecast: forecast for the next 8 days
+now: default action for current weather  
+hourly: weather for the next 12 hours  
+forecast: forecast for the next 8 days  
 
 ## Todo
 
@@ -56,6 +67,7 @@ forecast: forecast for the next 8 days
 * ~~add option for next 8 days forecast~~
 * ~~set now as default weather option~~
 * ~~add option to include my own latitude and longitude to config file~~
+* ~~convert dates to days names~~
 * add autoconfiguration
 * add to pipy for easy setup
 

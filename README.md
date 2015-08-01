@@ -29,7 +29,7 @@ You gonna need a Forecast.io API key, register [here](https://developer.forecast
 
 Just create the config/wheather.conf file and add your Forecast.io API key and you are ready.  
 
-You could add the latitude and logitude of the city you want to check the weather, just found the data on [travelmath.com](http://www.travelmath.com/)  
+You could add the latitude and logitude of the city you want to check the weather, just copy/paste the data from [travelmath.com](http://www.travelmath.com/)  
 
 If you leave both numbers empty, the script will try to check your location based on your IP.
 

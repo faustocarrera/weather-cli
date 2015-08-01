@@ -150,10 +150,16 @@ def format_hmid(hmid):
 
 def load_config():
     "load configuration"
-    script_path = os.path.abspath(os.path.dirname(sys.argv[0]))
+    script = sys.argv[0]
+    script_path = os.path.abspath(os.path.dirname(script))
     if not script_path:
         script_path = os.path.abspath('.')
     filename = r'%s/config/weather.conf' % script_path
+    # check if file exists
+    if not os.path.isfile(filename):
+        sys.exit(
+            'Error: you have to create the config file, run %s --setup' % script)
+    # load configuration
     config_parser = ConfigParser.RawConfigParser()
     config_parser.read(filename)
     config = {
@@ -168,6 +174,29 @@ def load_config():
     return config
 
 
+def setup():
+    script = sys.argv[0]
+    script_path = os.path.abspath(os.path.dirname(script))
+    if not script_path:
+        script_path = os.path.abspath('.')
+    filename = r'%s/config/weather.conf' % script_path
+    # read the input
+    print 'required parameters'
+    api_key = raw_input('Enter the forecast.io api key:')
+    print 'optional parameters'
+    lat = raw_input('Enter the latitude: ')
+    lon = raw_input('Enter the longitude: ')
+    # write configuration
+    print 'generating config file'
+    fconfig = open(filename, 'w')
+    fconfig.write("[forecast]\n")
+    fconfig.write("key = %s\n" % api_key)
+    fconfig.write("latitude = %s\n" % lat)
+    fconfig.write("longitude = %s\n" % lon)
+    fconfig.close()
+    sys.exit('setup complete')
+
+
 def arguments():
     "Parse cli arguments"
     parser = argparse.ArgumentParser(
@@ -176,6 +205,8 @@ def arguments():
     parser.add_argument(
         '--weather', required=False, type=str, help='What you want to know?',
         default='now', choices=['now', 'hourly', 'forecast'])
+    parser.add_argument(
+        '--setup', help='setup weather', action='store_true')
     parsed_args = parser.parse_args()
     return parsed_args
 
@@ -183,9 +214,13 @@ def arguments():
 def main():
     "entry point"
     args = arguments()
+    # check if we have to setup the config file
+    if args.setup:
+        setup()
+    # load configuration
     config = load_config()
     # check if we have a lat and long defined on the config
-    if config['geolocation']['lat'] == '' and config['geolocation']['lon'] == '':
+    if config['geolocation']['lat'] == '' or config['geolocation']['lon'] == '':
         ip_address = get_ip()
         geo = get_geolocation(ip_address)
     else:

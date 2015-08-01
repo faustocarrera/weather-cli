@@ -27,11 +27,11 @@ You gonna need a Forecast.io API key, register [here](https://developer.forecast
 
 ## Configuration
 
-Just create the config/wheather.conf file and add your Forecast.io API key and you are ready.  
+Just run weather.py --setup, add your Forecast.io API key and you are ready.  
 
-You could add the latitude and logitude of the city you want to check the weather, just copy/paste the data from [travelmath.com](http://www.travelmath.com/)  
+You could add the latitude and logitude of the city you want to check the weather, just go to [travelmath.com](http://www.travelmath.com/) and search the city.  
 
-If you leave both numbers empty, the script will try to check your location based on your IP.
+If you leave both numbers empty, the script will try to guess your location based on your public IP.
 
 ```python
 [forecast]
@@ -43,11 +43,11 @@ longitude = 37.6155556
 ## Try it
 
 * git clone git@github.com:faustocarrera/weather-cli.git
-* update the config/wheather.conf file with your Forecast.io API key
 * virtualenv env
 * source env/bin/activate
 * pip install -r requirements
-* python weather.py
+* python weather.py --setup
+* python weather.py --weather now
 * profit
 
 ## Usage
@@ -70,4 +70,3 @@ forecast: forecast for the next 8 days
 * ~~convert dates to days names~~
 * ~~add autoconfiguration~~
 * add to pipy for easy setup
-

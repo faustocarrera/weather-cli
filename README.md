@@ -68,6 +68,6 @@ forecast: forecast for the next 8 days
 * ~~set now as default weather option~~
 * ~~add option to include my own latitude and longitude to config file~~
 * ~~convert dates to days names~~
-* add autoconfiguration
+* ~~add autoconfiguration~~
 * add to pipy for easy setup
 

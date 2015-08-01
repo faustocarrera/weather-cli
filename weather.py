@@ -175,6 +175,7 @@ def load_config():
 
 
 def setup():
+    "help setup the config file"
     script = sys.argv[0]
     script_path = os.path.abspath(os.path.dirname(script))
     if not script_path:
@@ -187,7 +188,7 @@ def setup():
     lat = raw_input('Enter the latitude: ')
     lon = raw_input('Enter the longitude: ')
     # write configuration
-    print 'generating config file'
+    print 'generating config file...'
     fconfig = open(filename, 'w')
     fconfig.write("[forecast]\n")
     fconfig.write("key = %s\n" % api_key)

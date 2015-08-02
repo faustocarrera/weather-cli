@@ -9,7 +9,6 @@ checks the weather based on that information, so cool!
 import os
 import sys
 import ConfigParser
-import argparse
 import requests
 from requests.exceptions import ConnectionError
 from geoip import geolite2
@@ -20,21 +19,25 @@ import click
 
 
 class Weather(object):
+
+    "The weather class"
+
     ip_url = 'http://ipecho.net/plain'
     forecast_url = 'https://api.forecast.io/forecast'
-    api_key = None
+    forecast_api_key = None
     geo = None
 
     def __init__(self):
         pass
 
     def magic(self, data_type):
+        "check for weather"
         weather_data = self.get_weather()
         self.output(weather_data, data_type)
 
     def api_key(self, forecast):
         "set forecast.io api key"
-        self.api_key = forecast['key']
+        self.forecast_api_key = forecast['key']
 
     def geolocation(self, geo):
         "set geolocation"
@@ -72,11 +75,11 @@ class Weather(object):
         "request weather based on the location"
         geolocation = self.geo
         # check config key
-        if not self.api_key:
+        if not self.forecast_api_key:
             sys.exit('You have to provide a Forecast.io API key')
         forecast_url = '%s/%s/%s,%s/%s' % (
             self.forecast_url,
-            self.api_key,
+            self.forecast_api_key,
             geolocation['lat'],
             geolocation['lon'],
             '?units=si'
@@ -239,4 +242,4 @@ def cli(weather, setup):
 
 
 if __name__ == '__main__':
-    cli()
+    cli('now', False)

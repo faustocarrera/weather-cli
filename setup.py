@@ -9,14 +9,14 @@ try:
 except (IOError, ImportError):
     long_description = open('README.md').read()
 
+version = '0.1.9'
 requirements = [
     'requests >= 2.4',
+    'click >= 4.1',
     'python-geoip >= 1.2',
     'python-geoip-geolite2 >= 2015.303',
     'tabletext >= 0.1',
 ]
-
-version = '0.1.7'
 
 setup(
     name='weather-cli',
@@ -25,15 +25,14 @@ setup(
     author='Fausto Carrera',
     author_email='fausto.carrera@gmx.com',
     packages=find_packages(),
-    package_data={'weather': ['weather']},
     include_package_data=True,
     url='https://github.com/faustocarrera/weather-cli',
     license='MIT',
     description='check the weather from the cli',
     long_description=long_description,
     entry_points={
-        'console_script': [
-            'weather-cli=weather:main'
+        'console_scripts': [
+            'weather-cli=weather:cli'
         ]
     },
     classifiers=[

@@ -1,0 +1,2 @@
+import Weather
+Weather.cli()

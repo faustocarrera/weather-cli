@@ -16,6 +16,7 @@ from geoip import geolite2
 import json
 import datetime
 from tabletext import to_text
+import click
 
 
 class Weather(object):
@@ -23,6 +24,9 @@ class Weather(object):
     forecast_url = 'https://api.forecast.io/forecast'
     api_key = None
     geo = None
+
+    def __init__(self):
+        pass
 
     def magic(self, data_type):
         weather_data = self.get_weather()
@@ -47,7 +51,8 @@ class Weather(object):
             )
             result = req.text
         except ConnectionError, error:
-            sys.exit(error)
+            print error
+            sys.exit(1)
         return result
 
     @staticmethod
@@ -59,7 +64,8 @@ class Weather(object):
             result['lat'] = float(match.location[0])
             result['lon'] = float(match.location[1])
         except ValueError as error:
-            sys.exit(error)
+            print error
+            sys.exit(1)
         return result
 
     def get_weather(self):
@@ -85,7 +91,8 @@ class Weather(object):
         try:
             return json.loads(req.text)
         except ConnectionError, error:
-            sys.exit(error)
+            print error
+            sys.exit(1)
 
     def output(self, weather, data_type):
         "format and output the weather"
@@ -166,15 +173,12 @@ class Weather(object):
 
 def load_config():
     "load configuration"
-    script = sys.argv[0]
-    script_path = os.path.abspath(os.path.dirname(script))
-    if not script_path:
-        script_path = os.path.abspath('.')
-    filename = r'%s/../config/weather.conf' % script_path
+    script_path = os.path.dirname(os.path.abspath(__file__))
+    filename = os.path.join(script_path, 'weather.conf')
     # check if file exists
     if not os.path.isfile(filename):
         sys.exit(
-            'Error: you have to create the config file, run %s --setup' % script)
+            'Error: you have to create the config file, run weather-cli --setup')
     # load configuration
     config_parser = ConfigParser.RawConfigParser()
     config_parser.read(filename)
@@ -190,13 +194,10 @@ def load_config():
     return config
 
 
-def setup():
+def setup_config():
     "help setup the config file"
-    script = sys.argv[0]
-    script_path = os.path.abspath(os.path.dirname(script))
-    if not script_path:
-        script_path = os.path.abspath('.')
-    filename = r'%s/../config/weather.conf' % script_path
+    script_path = os.path.dirname(os.path.abspath(__file__))
+    filename = os.path.join(script_path, 'weather.conf')
     # read the input
     print 'required parameters'
     api_key = raw_input('Enter the forecast.io api key:')
@@ -214,40 +215,28 @@ def setup():
     sys.exit('setup complete')
 
 
-def arguments():
-    "Parse cli arguments"
-    parser = argparse.ArgumentParser(
-        prog=sys.argv[0],
-        description='How is outside? Use the weather cli to figure it out.')
-    parser.add_argument(
-        '--weather', required=False, type=str, help='What you want to know?',
-        default='now', choices=['now', 'hourly', 'forecast'])
-    parser.add_argument(
-        '--setup', help='setup weather', action='store_true')
-    parsed_args = parser.parse_args()
-    return parsed_args
-
-
-def main():
-    "entry point"
-    weather = Weather()
-    args = arguments()
+@click.command()
+@click.option('--weather', type=str, default='now', help='Get weather: now, hourly, forecast')
+@click.option('--setup', default=False, is_flag=True, help='Run setup')
+def cli(weather, setup):
+    "Weather from the command line"
+    whtr = Weather()
     # check if we have to setup the config file
-    if args.setup:
-        setup()
+    if setup:
+        setup_config()
     # load configuration
     config = load_config()
     # check if we have a lat and long defined on the config
     if config['geolocation']['lat'] == '' or config['geolocation']['lon'] == '':
-        ip_address = weather.get_ip()
-        geo = weather.get_geolocation(ip_address)
+        ip_address = whtr.get_ip()
+        geo = whtr.get_geolocation(ip_address)
     else:
         geo = config['geolocation']
     # display weather
-    weather.api_key(config['forecast'])
-    weather.geolocation(geo)
-    weather.magic(args.weather)
+    whtr.api_key(config['forecast'])
+    whtr.geolocation(geo)
+    whtr.magic(weather)
 
 
 if __name__ == '__main__':
-    main()
+    cli()

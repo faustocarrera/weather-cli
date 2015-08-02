@@ -1,2 +1,2 @@
-from .weather import Weather
-from .weather import main
+from .Weather import Weather
+from .Weather import cli

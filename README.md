@@ -20,7 +20,7 @@ Basically the script checks your ip, geolocate the ip and checks the weather bas
 Install requirements
 
 ```python
-pip install -r requirements
+pip install -r requirements.txt
 ```
 
 You gonna need a Forecast.io API key, register [here](https://developer.forecast.io/) to obtain it. You have 999 API calls per day for free, enough to check the weather a couple of times a day.
@@ -45,9 +45,9 @@ longitude = 37.6155556
 * git clone git@github.com:faustocarrera/weather-cli.git
 * virtualenv env
 * source env/bin/activate
-* pip install -r requirements
-* python weather.py --setup
-* python weather.py --weather now
+* pip install -r requirements.txt
+* python weather/weather.py --setup
+* python weather/weather.py --weather now
 * profit
 
 ## Usage
@@ -60,13 +60,6 @@ now: default action for current weather
 hourly: weather for the next 12 hours  
 forecast: forecast for the next 8 days  
 
-## Todo
+# License
 
-* ~~add option for just current weather~~
-* ~~add option for next 12 hours forecast~~
-* ~~add option for next 8 days forecast~~
-* ~~set now as default weather option~~
-* ~~add option to include my own latitude and longitude to config file~~
-* ~~convert dates to days names~~
-* ~~add autoconfiguration~~
-* add to pipy for easy setup
+MIT

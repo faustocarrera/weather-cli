@@ -1,0 +1,10 @@
+Weather ToDo list
+ ☐ Option to print weather as json object
+ ☐ When user runs setup check if the user is running it as root
+ ☐ Way to check the information entered on setup
+ ☐ Add version function to display the current version
+ ☐ Add about function to display the developers data
+
+Links
+- https://stackoverflow.com/questions/1871549/python-determine-if-running-inside-virtualenv
+- http://www.servercobra.com/python-check-if-script-is-run-as-root/

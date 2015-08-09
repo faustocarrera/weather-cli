@@ -52,6 +52,23 @@ forecast: forecast for the next 8 days
 * python weather/Weather.py --weather now
 * profit
 
-# License
+## License
 
 MIT
+
+## Version history
+
+**ver 0.1.11**  
+small fixes  
+add new short options -n -h -f  
+add about  
+add config info  
+check error on setup 
+
+**ver 0.1.10**  
+first beta version
+
+**ver 0.1.0**  
+first alpha version
+
+

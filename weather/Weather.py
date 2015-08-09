@@ -209,26 +209,75 @@ def setup_config():
     lon = raw_input('Enter the longitude: ')
     # write configuration
     print 'generating config file...'
-    fconfig = open(filename, 'w')
-    fconfig.write("[forecast]\n")
-    fconfig.write("key = %s\n" % api_key)
-    fconfig.write("latitude = %s\n" % lat)
-    fconfig.write("longitude = %s\n" % lon)
-    fconfig.close()
-    sys.exit('setup complete')
+    try:
+        fconfig = open(filename, 'w')
+        fconfig.write("[forecast]\n")
+        fconfig.write("key = %s\n" % api_key)
+        fconfig.write("latitude = %s\n" % lat)
+        fconfig.write("longitude = %s\n" % lon)
+        fconfig.close()
+        print 'setup complete'
+        sys.exit(0)
+    except IOError:
+        print 'Use virtualenv or setup as root'
+        sys.exit(1)
+
+
+def about_self():
+    "About weather-cli"
+    abt = """
+    Weather-cli
+    Weather from the command line
+    Version: 0.1.11
+    Author: Fausto Carrera <fausto.carrera@gmx.com>
+    """
+    return abt
+
+
+def print_config(config):
+    "Current configuration"
+    print 'Current configuration'
+    print 'api key:   %s' % config['forecast']['key']
+    print 'latitude:  %s' % config['geolocation']['lat']
+    print 'longitude: %s' % config['geolocation']['lon']
 
 
 @click.command()
-@click.option('--weather', type=str, default='now', help='Get weather: now, hourly, forecast')
-@click.option('--setup', default=False, is_flag=True, help='Run setup')
-def cli(weather, setup):
+@click.option('-n', '--now', 'now', default=False, is_flag=True,
+              help='Get current weather')
+@click.option('-h', '--hourly', 'hourly', default=False, is_flag=True,
+              help='Get the next 24 hours weather')
+@click.option('-f', '--forecast', 'forecast', default=False, is_flag=True,
+              help='Get the next days weather')
+@click.option('--about', 'about', default=False, is_flag=True,
+              help='About weather-cli')
+@click.option('--info', 'info', default=False, is_flag=True,
+              help='Check current configuration')
+@click.option('--setup', 'setup', default=False, is_flag=True,
+              help='Run setup')
+def cli(now, hourly, forecast, about, info, setup):
     "Weather from the command line"
+    # weather type
+    weather = 'now'
+    if hourly:
+        weather = 'hourly'
+    if forecast:
+        weather = 'forecast'
+    # setup weather
     whtr = Weather()
     # check if we have to setup the config file
     if setup:
         setup_config()
     # load configuration
     config = load_config()
+    # info
+    if info:
+        print_config(config)
+        sys.exit(0)
+    # check if about
+    if about:
+        print about_self()
+        sys.exit(0)
     # check if we have a lat and long defined on the config
     if config['geolocation']['lat'] == '' or config['geolocation']['lon'] == '':
         ip_address = whtr.get_ip()
@@ -242,4 +291,4 @@ def cli(weather, setup):
 
 
 if __name__ == '__main__':
-    cli('now', False)
+    cli()

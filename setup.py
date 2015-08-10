@@ -9,7 +9,7 @@ try:
 except (IOError, ImportError):
     long_description = open('README.md').read()
 
-version = '0.1.11'
+version = '0.1.12'
 requirements = [
     'requests >= 2.4',
     'click >= 4.1',
@@ -36,7 +36,7 @@ setup(
         ]
     },
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Environment :: Console',
         'License :: OSI Approved :: MIT License',
         'Operating System :: POSIX',

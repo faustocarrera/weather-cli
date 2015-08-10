@@ -13,6 +13,8 @@ pip install weather-cli
 weather-cli --setup
 ```
 
+If you installed directly without using virtualenv, you have to use sudo to set it up.
+
 You gonna need a Forecast.io API key, register [here](https://developer.forecast.io/) to obtain it. You have 999 API calls per day for free, enough to check the weather a couple of times a day.
 
 You could add the latitude and logitude of the city you want to check the weather, just go to [travelmath.com](http://www.travelmath.com/) and search the city.  
@@ -22,12 +24,19 @@ If you leave both numbers empty, the script will try to guess your location base
 ## Usage
 
 ```
-weather-cli --weather [OPTION]
+weather-cli [OPTION] [FORMAT]
 ```
 
-now: default action for current weather  
-hourly: weather for the next 12 hours  
-forecast: forecast for the next 8 days  
+|Option          | Description                   |
+|----------------|-------------------------------|
+|-n, --now       | Get current weather           |
+|-h, --hourly    | Get the next 24 hours weather |
+|-f, --forecast  | Get the next days weather     |
+|--about         | About weather-cli             |
+|--info          | Check current configuration   |
+|--setup         | Run setup                     |
+|--format [json] | Output format                 |
+|--help          | Show this message and exit.   |
 
 ## Data sources
 
@@ -58,6 +67,9 @@ MIT
 
 ## Version history
 
+**ver 0.1.12**  
+add output data as json
+
 **ver 0.1.11**  
 small fixes  
 add new short options -n -h -f  
@@ -70,5 +82,3 @@ first beta version
 
 **ver 0.1.0**  
 first alpha version
-
-

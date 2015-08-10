@@ -1,5 +1,5 @@
 Weather ToDo list
- ☐ When user runs setup check if the user is running it as root
+ ✔ When user runs setup check if the user is running it as root @done (15-08-08 21:16)
  ☐ Option to print weather as json object
  ✔ Way to check the information entered on setup @done (15-08-08 20:19)
  ✔ Add version function to display the current version @done (15-08-08 20:19)

@@ -30,10 +30,18 @@ class Weather(object):
     def __init__(self):
         pass
 
-    def magic(self, data_type):
+    def magic(self, data_type, format):
         "check for weather"
         weather_data = self.get_weather()
-        self.output(weather_data, data_type)
+        weather_result = self.output(weather_data, data_type)
+        # print result
+        if format == 'json':
+            print json.dumps(weather_result)
+        else:
+            print ''
+            print weather_result['header']
+            print to_text(weather_result['table'], header=False, corners='+',
+                          hor='-', ver='|', formats=['', '', '>', '>', '>', '>'])
 
     def api_key(self, forecast):
         "set forecast.io api key"
@@ -99,6 +107,7 @@ class Weather(object):
 
     def output(self, weather, data_type):
         "format and output the weather"
+        header = ''
         table = []
         # city name
         city = str(weather['timezone']).replace('_', ' ')
@@ -109,8 +118,7 @@ class Weather(object):
             hourly = weather['hourly']['data']
         # current weather
         if data_type == 'now':
-            print ''
-            print '%s now' % city
+            header = '%s now' % city
             table.append(['summary', 'temp', 'term', 'humidity'])
             table.append([weather['currently']['summary'],
                           self.format_temp(
@@ -121,8 +129,7 @@ class Weather(object):
 
         # next 24 hours
         if data_type == 'hourly':
-            print ''
-            print '%s forecast next %s hours' % (city, len(hourly))
+            header = '%s forecast next %s hours' % (city, len(hourly))
             table.append(['day', 'summary', 'temp', 'term', 'humidity'])
             for data in hourly:
                 table.append([self.format_timestamp(data['time'], 'hour'),
@@ -133,8 +140,8 @@ class Weather(object):
 
         # next few days
         if data_type == 'forecast':
-            print ''
-            print '%s forecast next %s days' % (city, len(weather['daily']['data']))
+            header = '%s forecast next %s days' % (
+                city, len(weather['daily']['data']))
             table.append(['day', 'summary', 'min', 'max', 'humidity', 'rain'])
             for data in weather['daily']['data']:
                 table.append([self.format_timestamp(data['time']),
@@ -143,8 +150,7 @@ class Weather(object):
                               self.format_temp(data['temperatureMax']),
                               self.format_percent(data['humidity']),
                               self.format_percent(data['precipProbability'])])
-        print to_text(table, header=False, corners='+', hor='-', ver='|',
-                      formats=['', '', '>', '>', '>', '>'])
+        return {'header': header, 'table': table}
 
     @staticmethod
     def format_timestamp(timestamp, data_type='day'):
@@ -228,7 +234,7 @@ def about_self():
     abt = """
     Weather-cli
     Weather from the command line
-    Version: 0.1.11
+    Version: 0.1.12
     Author: Fausto Carrera <fausto.carrera@gmx.com>
     """
     return abt
@@ -255,7 +261,9 @@ def print_config(config):
               help='Check current configuration')
 @click.option('--setup', 'setup', default=False, is_flag=True,
               help='Run setup')
-def cli(now, hourly, forecast, about, info, setup):
+@click.option('--format', 'format', type=click.Choice(['json']),
+              help='Output format')
+def cli(now, hourly, forecast, about, info, setup, format):
     "Weather from the command line"
     # weather type
     weather = 'now'
@@ -287,7 +295,7 @@ def cli(now, hourly, forecast, about, info, setup):
     # display weather
     whtr.api_key(config['forecast'])
     whtr.geolocation(geo)
-    whtr.magic(weather)
+    whtr.magic(weather, format)
 
 
 if __name__ == '__main__':

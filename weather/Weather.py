@@ -17,6 +17,7 @@ import datetime
 from tabletext import to_text
 import click
 
+__version__ = '0.2.1'
 
 class Weather(object):
 
@@ -188,12 +189,24 @@ def load_config():
     filename = os.path.join(script_path, 'weather.conf')
     # check if file exists
     if not os.path.isfile(filename):
-        sys.exit(
-            'Error: you have to create the config file, run weather-cli --setup')
+        sys.exit('Error: you have to create the config file, run weather-cli --setup')
     # load configuration
     config_parser = ConfigParser.RawConfigParser()
     config_parser.read(filename)
+    # check configuration
+    try:
+        version = config_parser.get('weather', 'version')
+        if version != __version__:
+            reconfig(version, filename)
+            config_parser.read(filename)
+    except ConfigParser.NoSectionError:
+        reconfig('0.0.0', filename)
+        config_parser.read(filename)
+    # config
     config = {
+        'weather' : {
+            'version': config_parser.get('weather', 'version'),
+        },
         'forecast': {
             'key': config_parser.get('forecast', 'key'),
         },
@@ -205,6 +218,33 @@ def load_config():
     }
     return config
 
+def reconfig(version, filename):
+    print 'updating configuration...'
+    config_parser = ConfigParser.RawConfigParser()
+    config_parser.read(filename)
+    if version == '0.0.0':
+        key = config_parser.get('forecast', 'key')
+        lat = config_parser.get('forecast', 'latitude')
+        lon = config_parser.get('forecast', 'longitude')
+        location = None
+        if lat and lon:
+            # force disable insecure request warning
+            requests.packages.urllib3.disable_warnings()
+            geo = geocoder.google([lat, lon], method='reverse')
+            location = '%s, %s' % (geo.city, geo.country)
+        
+    fconfig = open(filename, 'w')
+    fconfig.write("[weather]\n")
+    fconfig.write("version = %s\n" % __version__)
+    fconfig.write("[forecast]\n")
+    fconfig.write("key = %s\n" % key)
+    fconfig.write("[geolocation]\n")
+    fconfig.write("location = %s\n" % location)
+    fconfig.write("latitude = %s\n" % lat)
+    fconfig.write("longitude = %s\n" % lon)
+    fconfig.close()
+    print 'done!'
+    sys.exit()
 
 def setup_config():
     "help setup the config file"
@@ -238,6 +278,8 @@ def setup_config():
     print 'generating config file...'
     try:
         fconfig = open(filename, 'w')
+        fconfig.write("[weather]\n")
+        fconfig.write("version = %s\n" % __version__)
         fconfig.write("[forecast]\n")
         fconfig.write("key = %s\n" % api_key)
         fconfig.write("[geolocation]\n")
@@ -257,9 +299,9 @@ def about_self():
     abt = """
     Weather-cli
     Weather from the command line
-    Version: 0.2.1
+    Version: %s
     Author: Fausto Carrera <fausto.carrera@gmx.com>
-    """
+    """ % __version__
     return abt
 
 
@@ -267,6 +309,7 @@ def print_config(config):
     "Current configuration"
     print ''
     print 'Current configuration'
+    print 'version:   %s' % config['weather']['version']
     print 'api key:   %s' % config['forecast']['key']
     print 'location:  %s' % config['geolocation']['location']
     print 'latitude:  %s' % config['geolocation']['lat']
@@ -286,6 +329,10 @@ def cli(weather, about, info, setup, format):
     "Weather from the command line"
     # setup weather
     whtr = Weather()
+    # check if about
+    if about:
+        print about_self()
+        sys.exit(0)
     # check if we have to setup the config file
     if setup:
         setup_config()
@@ -294,10 +341,6 @@ def cli(weather, about, info, setup, format):
     # info
     if info:
         print_config(config)
-        sys.exit(0)
-    # check if about
-    if about:
-        print about_self()
         sys.exit(0)
     # check if we have a lat and long defined on the config
     if config['geolocation']['lat'] == '' or config['geolocation']['lon'] == '':

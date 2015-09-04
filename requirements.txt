@@ -1,5 +1,4 @@
 requests>=2.4
 click>=4.1
-python-geoip>=1.2
-python-geoip-geolite2>=2015.303
+geocoder>=1.5
 tabletext>=0.1

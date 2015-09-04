@@ -9,12 +9,11 @@ try:
 except (IOError, ImportError):
     long_description = open('README.md').read()
 
-version = '0.1.12'
+version = '0.2.1'
 requirements = [
     'requests >= 2.4',
     'click >= 4.1',
-    'python-geoip >= 1.2',
-    'python-geoip-geolite2 >= 2015.303',
+    'geocoder >= 1.5',
     'tabletext >= 0.1',
 ]
 

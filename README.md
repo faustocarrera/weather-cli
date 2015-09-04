@@ -47,8 +47,7 @@ weather-cli [OPTION] [FORMAT]
 ## Dependencies
 
 * [requests](http://docs.python-requests.org/en/latest/) >= 2.4
-* [python-geoip](https://pythonhosted.org/python-geoip/) >= 2.2
-* [python-geoip-geolite2](https://pypi.python.org/pypi/python-geoip-geolite2) >= 2015.303
+* [geocoder](https://github.com/DenisCarriere/geocoder) >= 1.5
 * [tabletext](https://github.com/Thibauth/tabletext) >= 0.1
 
 ## Try it without installing
@@ -58,7 +57,7 @@ weather-cli [OPTION] [FORMAT]
 * source env/bin/activate
 * pip install -r requirements.txt
 * python weather/Weather.py --setup
-* python weather/Weather.py --weather now
+* python weather/Weather.py [OPTIONS] [FORMAT]
 * profit
 
 ## License
@@ -66,6 +65,11 @@ weather-cli [OPTION] [FORMAT]
 MIT
 
 ## Version history
+
+**ver 0.2.1**  
+Replace python-geoip for geocoder library for a better geolocation   
+Enhace the setup process to be more descriptive  
+Add city name to config file  
 
 **ver 0.1.12**  
 add output data as json

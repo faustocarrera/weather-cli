@@ -1,5 +1,8 @@
+[weather]
+version = 0.0.0
 [forecast]
-url = https://api.forecast.io/forecast
 key = your_forecast_io_key
+[geolocation]
+location =
 latitude =
 longitude =

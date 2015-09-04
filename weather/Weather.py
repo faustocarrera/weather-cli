@@ -11,12 +11,13 @@ import sys
 import ConfigParser
 import requests
 from requests.exceptions import ConnectionError
-from geoip import geolite2
+import geocoder
 import json
 import datetime
 from tabletext import to_text
 import click
 
+__version__ = '0.2.1'
 
 class Weather(object):
 
@@ -33,7 +34,8 @@ class Weather(object):
     def magic(self, data_type, format):
         "check for weather"
         weather_data = self.get_weather()
-        weather_result = self.output(weather_data, data_type)
+        weather_result = self.output(
+            self.geo['location'], weather_data, data_type)
         # print result
         if format == 'json':
             print json.dumps(weather_result)
@@ -69,11 +71,14 @@ class Weather(object):
     @staticmethod
     def get_geolocation(ipaddress):
         "check latitude and longitude of the ip"
-        result = {'lat': 0, ' lon': 0}
+        result = {'city': None, 'lat': 0, ' lon': 0}
         try:
-            match = geolite2.lookup(ipaddress)
-            result['lat'] = float(match.location[0])
-            result['lon'] = float(match.location[1])
+            # force disable insecure request warning
+            requests.packages.urllib3.disable_warnings()
+            match = geocoder.ip(ipaddress)
+            result['location'] = '%s, %s' % (match.city, match.country)
+            result['lat'] = float(match.lat)
+            result['lon'] = float(match.lng)
         except ValueError as error:
             print error
             sys.exit(1)
@@ -105,12 +110,10 @@ class Weather(object):
             print error
             sys.exit(1)
 
-    def output(self, weather, data_type):
+    def output(self, location, weather, data_type):
         "format and output the weather"
         header = ''
         table = []
-        # city name
-        city = str(weather['timezone']).replace('_', ' ')
         # hourly limit
         if len(weather['hourly']['data']) > 24:
             hourly = weather['hourly']['data'][0:24]
@@ -118,7 +121,7 @@ class Weather(object):
             hourly = weather['hourly']['data']
         # current weather
         if data_type == 'now':
-            header = '%s now' % city
+            header = 'Weather in %s now' % location
             table.append(['summary', 'temp', 'term', 'humidity'])
             table.append([weather['currently']['summary'],
                           self.format_temp(
@@ -129,7 +132,7 @@ class Weather(object):
 
         # next 24 hours
         if data_type == 'hourly':
-            header = '%s forecast next %s hours' % (city, len(hourly))
+            header = '%s forecast next %s hours' % (location, len(hourly))
             table.append(['day', 'summary', 'temp', 'term', 'humidity'])
             for data in hourly:
                 table.append([self.format_timestamp(data['time'], 'hour'),
@@ -141,7 +144,7 @@ class Weather(object):
         # next few days
         if data_type == 'forecast':
             header = '%s forecast next %s days' % (
-                city, len(weather['daily']['data']))
+                location, len(weather['daily']['data']))
             table.append(['day', 'summary', 'min', 'max', 'humidity', 'rain'])
             for data in weather['daily']['data']:
                 table.append([self.format_timestamp(data['time']),
@@ -186,39 +189,101 @@ def load_config():
     filename = os.path.join(script_path, 'weather.conf')
     # check if file exists
     if not os.path.isfile(filename):
-        sys.exit(
-            'Error: you have to create the config file, run weather-cli --setup')
+        sys.exit('Error: you have to create the config file, run weather-cli --setup')
     # load configuration
     config_parser = ConfigParser.RawConfigParser()
     config_parser.read(filename)
+    # check configuration
+    try:
+        version = config_parser.get('weather', 'version')
+        if version != __version__:
+            reconfig(version, filename)
+            config_parser.read(filename)
+    except ConfigParser.NoSectionError:
+        reconfig('0.0.0', filename)
+        config_parser.read(filename)
+    # config
     config = {
+        'weather' : {
+            'version': config_parser.get('weather', 'version'),
+        },
         'forecast': {
             'key': config_parser.get('forecast', 'key'),
         },
         'geolocation': {
-            'lat': config_parser.get('forecast', 'latitude'),
-            'lon': config_parser.get('forecast', 'longitude'),
+            'location': config_parser.get('geolocation', 'location'),
+            'lat': config_parser.get('geolocation', 'latitude'),
+            'lon': config_parser.get('geolocation', 'longitude'),
         }
     }
     return config
 
+def reconfig(version, filename):
+    print 'updating configuration...'
+    config_parser = ConfigParser.RawConfigParser()
+    config_parser.read(filename)
+    if version == '0.0.0':
+        key = config_parser.get('forecast', 'key')
+        lat = config_parser.get('forecast', 'latitude')
+        lon = config_parser.get('forecast', 'longitude')
+        location = None
+        if lat and lon:
+            # force disable insecure request warning
+            requests.packages.urllib3.disable_warnings()
+            geo = geocoder.google([lat, lon], method='reverse')
+            location = '%s, %s' % (geo.city, geo.country)
+        
+    fconfig = open(filename, 'w')
+    fconfig.write("[weather]\n")
+    fconfig.write("version = %s\n" % __version__)
+    fconfig.write("[forecast]\n")
+    fconfig.write("key = %s\n" % key)
+    fconfig.write("[geolocation]\n")
+    fconfig.write("location = %s\n" % location)
+    fconfig.write("latitude = %s\n" % lat)
+    fconfig.write("longitude = %s\n" % lon)
+    fconfig.close()
+    print 'done!'
+    sys.exit()
 
 def setup_config():
     "help setup the config file"
     script_path = os.path.dirname(os.path.abspath(__file__))
     filename = os.path.join(script_path, 'weather.conf')
-    # read the input
-    print 'required parameters'
-    api_key = raw_input('Enter the forecast.io api key:')
-    print 'optional parameters'
-    lat = raw_input('Enter the latitude: ')
-    lon = raw_input('Enter the longitude: ')
+    # required parameters
+    print ''
+    api_key = raw_input('Enter your forecast.io api key (required):')
+    if not api_key:
+        print 'Sorry, the api key is required'
+        print 'get your api key from https://developer.forecast.io/'
+        sys.exit(1)
+    # optional parameters
+    print 'Warning:'
+    print 'The script will try to geolocate your IP.'
+    print 'If you fill the latitude and longitude, you avoid the IP geolocation.'
+    print 'Use it if you want a more acurated result, use a different location,'
+    print 'or just avoid the IP geolocation.'
+    print 'Check your latitude and longitude from http://www.travelmath.com/'
+    print ''
+    lat = raw_input('Enter the latitude (optional): ')
+    lon = raw_input('Enter the longitude (optional): ')
+    # get the city name
+    location = None
+    if lat and lon:
+        # force disable insecure request warning
+        requests.packages.urllib3.disable_warnings()
+        geo = geocoder.google([lat, lon], method='reverse')
+        location = '%s, %s' % (geo.city, geo.country)
     # write configuration
     print 'generating config file...'
     try:
         fconfig = open(filename, 'w')
+        fconfig.write("[weather]\n")
+        fconfig.write("version = %s\n" % __version__)
         fconfig.write("[forecast]\n")
         fconfig.write("key = %s\n" % api_key)
+        fconfig.write("[geolocation]\n")
+        fconfig.write("location = %s\n" % location)
         fconfig.write("latitude = %s\n" % lat)
         fconfig.write("longitude = %s\n" % lon)
         fconfig.close()
@@ -234,45 +299,40 @@ def about_self():
     abt = """
     Weather-cli
     Weather from the command line
-    Version: 0.1.12
+    Version: %s
     Author: Fausto Carrera <fausto.carrera@gmx.com>
-    """
+    """ % __version__
     return abt
 
 
 def print_config(config):
     "Current configuration"
+    print ''
     print 'Current configuration'
+    print 'version:   %s' % config['weather']['version']
     print 'api key:   %s' % config['forecast']['key']
+    print 'location:  %s' % config['geolocation']['location']
     print 'latitude:  %s' % config['geolocation']['lat']
     print 'longitude: %s' % config['geolocation']['lon']
+    print ''
 
 
 @click.command()
-@click.option('-n', '--now', 'now', default=False, is_flag=True,
-              help='Get current weather')
-@click.option('-h', '--hourly', 'hourly', default=False, is_flag=True,
-              help='Get the next 24 hours weather')
-@click.option('-f', '--forecast', 'forecast', default=False, is_flag=True,
-              help='Get the next days weather')
-@click.option('--about', 'about', default=False, is_flag=True,
-              help='About weather-cli')
-@click.option('--info', 'info', default=False, is_flag=True,
-              help='Check current configuration')
-@click.option('--setup', 'setup', default=False, is_flag=True,
-              help='Run setup')
-@click.option('--format', 'format', type=click.Choice(['json']),
-              help='Output format')
-def cli(now, hourly, forecast, about, info, setup, format):
+@click.option('--now', '-n', 'weather', flag_value='now', default=True, help='Get current weather')
+@click.option('--hourly', '-h', 'weather', flag_value='hourly', help='Get the next 24 hours weather')
+@click.option('--forecast', '-f', 'weather', flag_value='forecast', help='Get the next days weather')
+@click.option('--about', 'about', default=False, is_flag=True, help='About weather-cli')
+@click.option('--info', 'info', default=False, is_flag=True, help='Check current configuration')
+@click.option('--setup', 'setup', default=False, is_flag=True, help='Run setup')
+@click.option('--format', 'format', type=click.Choice(['json']), help='Output format')
+def cli(weather, about, info, setup, format):
     "Weather from the command line"
-    # weather type
-    weather = 'now'
-    if hourly:
-        weather = 'hourly'
-    if forecast:
-        weather = 'forecast'
     # setup weather
     whtr = Weather()
+    # check if about
+    if about:
+        print about_self()
+        sys.exit(0)
     # check if we have to setup the config file
     if setup:
         setup_config()
@@ -281,10 +341,6 @@ def cli(now, hourly, forecast, about, info, setup, format):
     # info
     if info:
         print_config(config)
-        sys.exit(0)
-    # check if about
-    if about:
-        print about_self()
         sys.exit(0)
     # check if we have a lat and long defined on the config
     if config['geolocation']['lat'] == '' or config['geolocation']['lon'] == '':

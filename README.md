@@ -56,8 +56,8 @@ weather-cli [OPTION] [FORMAT]
 * virtualenv env
 * source env/bin/activate
 * pip install -r requirements.txt
-* python weather/Weather.py --setup
-* python weather/Weather.py [OPTIONS] [FORMAT]
+* python weather/weather.py --setup
+* python weather/weather.py [OPTIONS] [FORMAT]
 * profit
 
 ## License
@@ -65,6 +65,12 @@ weather-cli [OPTION] [FORMAT]
 MIT
 
 ## Version history
+
+**ver 1.0.0**
+add python3 support
+
+**ver 0.2.3**
+Fix weather api url
 
 **ver 0.2.1**  
 Replace python-geoip for geocoder library for a better geolocation   

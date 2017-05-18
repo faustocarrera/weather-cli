@@ -1,2 +1,2 @@
-import Weather
-Weather.cli()
+import weather
+weather.cli()

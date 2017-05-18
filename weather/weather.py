@@ -8,7 +8,6 @@ checks the weather based on that information, so cool!
 
 import os
 import sys
-import ConfigParser
 import requests
 from requests.exceptions import ConnectionError
 import geocoder
@@ -17,33 +16,45 @@ import datetime
 from tabletext import to_text
 import click
 
-__version__ = '0.2.1'
+try:
+    import ConfigParser as configparser
+except:
+    import configparser
+
+__version__ = '1.0.0'
+
 
 class Weather(object):
 
     "The weather class"
 
     ip_url = 'http://ipecho.net/plain'
-    forecast_url = 'https://api.forecast.io/forecast'
+    forecast_url = 'https://api.darksky.net/forecast'
     forecast_api_key = None
     geo = None
 
     def __init__(self):
         pass
 
-    def magic(self, data_type, format):
+    def magic(self, data_type, output):
         "check for weather"
         weather_data = self.get_weather()
         weather_result = self.output(
             self.geo['location'], weather_data, data_type)
-        # print result
-        if format == 'json':
-            print json.dumps(weather_result)
+        # print(result)
+        if output == 'json':
+            print(json.dumps(weather_result))
         else:
-            print ''
-            print weather_result['header']
-            print to_text(weather_result['table'], header=False, corners='+',
-                          hor='-', ver='|', formats=['', '', '>', '>', '>', '>'])
+            print('')
+            print(weather_result['header'])
+            print(to_text(
+                weather_result['table'],
+                header=False,
+                corners='+',
+                hor='-',
+                ver='|',
+                formats=['', '', '>', '>', '>', '>']
+            ))
 
     def api_key(self, forecast):
         "set forecast.io api key"
@@ -63,8 +74,8 @@ class Weather(object):
                 headers=headers,
             )
             result = req.text
-        except ConnectionError, error:
-            print error
+        except ConnectionError as error:
+            print(error)
             sys.exit(1)
         return result
 
@@ -80,7 +91,7 @@ class Weather(object):
             result['lat'] = float(match.lat)
             result['lon'] = float(match.lng)
         except ValueError as error:
-            print error
+            print(error)
             sys.exit(1)
         return result
 
@@ -106,8 +117,8 @@ class Weather(object):
         )
         try:
             return json.loads(req.text)
-        except ConnectionError, error:
-            print error
+        except ConnectionError as error:
+            print(error)
             sys.exit(1)
 
     def output(self, location, weather, data_type):
@@ -191,7 +202,7 @@ def load_config():
     if not os.path.isfile(filename):
         sys.exit('Error: you have to create the config file, run weather-cli --setup')
     # load configuration
-    config_parser = ConfigParser.RawConfigParser()
+    config_parser = configparser.RawConfigParser()
     config_parser.read(filename)
     # check configuration
     try:
@@ -199,12 +210,12 @@ def load_config():
         if version != __version__:
             reconfig(version, filename)
             config_parser.read(filename)
-    except ConfigParser.NoSectionError:
+    except configparser.NoSectionError:
         reconfig('0.0.0', filename)
         config_parser.read(filename)
     # config
     config = {
-        'weather' : {
+        'weather': {
             'version': config_parser.get('weather', 'version'),
         },
         'forecast': {
@@ -218,9 +229,10 @@ def load_config():
     }
     return config
 
+
 def reconfig(version, filename):
-    print 'updating configuration...'
-    config_parser = ConfigParser.RawConfigParser()
+    print('updating configuration...')
+    config_parser = configparser.RawConfigParser()
     config_parser.read(filename)
     if version == '0.0.0':
         key = config_parser.get('forecast', 'key')
@@ -232,7 +244,7 @@ def reconfig(version, filename):
             requests.packages.urllib3.disable_warnings()
             geo = geocoder.google([lat, lon], method='reverse')
             location = '%s, %s' % (geo.city, geo.country)
-        
+
     fconfig = open(filename, 'w')
     fconfig.write("[weather]\n")
     fconfig.write("version = %s\n" % __version__)
@@ -243,28 +255,29 @@ def reconfig(version, filename):
     fconfig.write("latitude = %s\n" % lat)
     fconfig.write("longitude = %s\n" % lon)
     fconfig.close()
-    print 'done!'
+    print('done!')
     sys.exit()
+
 
 def setup_config():
     "help setup the config file"
     script_path = os.path.dirname(os.path.abspath(__file__))
     filename = os.path.join(script_path, 'weather.conf')
     # required parameters
-    print ''
+    print('')
     api_key = raw_input('Enter your forecast.io api key (required):')
     if not api_key:
-        print 'Sorry, the api key is required'
-        print 'get your api key from https://developer.forecast.io/'
+        print('Sorry, the api key is required')
+        print('get your api key from https://developer.forecast.io/')
         sys.exit(1)
     # optional parameters
-    print 'Warning:'
-    print 'The script will try to geolocate your IP.'
-    print 'If you fill the latitude and longitude, you avoid the IP geolocation.'
-    print 'Use it if you want a more acurated result, use a different location,'
-    print 'or just avoid the IP geolocation.'
-    print 'Check your latitude and longitude from http://www.travelmath.com/'
-    print ''
+    print('Warning:')
+    print('The script will try to geolocate your IP.')
+    print('If you fill the latitude and longitude, you avoid the IP geolocation.')
+    print('Use it if you want a more acurated result, use a different location,')
+    print('or just avoid the IP geolocation.')
+    print('Check your latitude and longitude from http://www.travelmath.com/')
+    print('')
     lat = raw_input('Enter the latitude (optional): ')
     lon = raw_input('Enter the longitude (optional): ')
     # get the city name
@@ -275,7 +288,7 @@ def setup_config():
         geo = geocoder.google([lat, lon], method='reverse')
         location = '%s, %s' % (geo.city, geo.country)
     # write configuration
-    print 'generating config file...'
+    print('generating config file...')
     try:
         fconfig = open(filename, 'w')
         fconfig.write("[weather]\n")
@@ -287,17 +300,17 @@ def setup_config():
         fconfig.write("latitude = %s\n" % lat)
         fconfig.write("longitude = %s\n" % lon)
         fconfig.close()
-        print 'setup complete'
+        print('setup complete')
         sys.exit(0)
     except IOError:
-        print 'Use virtualenv or setup as root'
+        print('Use virtualenv or setup as root')
         sys.exit(1)
 
 
 def about_self():
     "About weather-cli"
     abt = """
-    Weather-cli
+    weather-cli
     Weather from the command line
     Version: %s
     Author: Fausto Carrera <fausto.carrera@gmx.com>
@@ -307,14 +320,14 @@ def about_self():
 
 def print_config(config):
     "Current configuration"
-    print ''
-    print 'Current configuration'
-    print 'version:   %s' % config['weather']['version']
-    print 'api key:   %s' % config['forecast']['key']
-    print 'location:  %s' % config['geolocation']['location']
-    print 'latitude:  %s' % config['geolocation']['lat']
-    print 'longitude: %s' % config['geolocation']['lon']
-    print ''
+    print('')
+    print('Current configuration')
+    print('version:   %s' % config['weather']['version'])
+    print('api key:   %s' % config['forecast']['key'])
+    print('location:  %s' % config['geolocation']['location'])
+    print('latitude:  %s' % config['geolocation']['lat'])
+    print('longitude: %s' % config['geolocation']['lon'])
+    print('')
 
 
 @click.command()
@@ -324,14 +337,14 @@ def print_config(config):
 @click.option('--about', 'about', default=False, is_flag=True, help='About weather-cli')
 @click.option('--info', 'info', default=False, is_flag=True, help='Check current configuration')
 @click.option('--setup', 'setup', default=False, is_flag=True, help='Run setup')
-@click.option('--format', 'format', type=click.Choice(['json']), help='Output format')
-def cli(weather, about, info, setup, format):
+@click.option('--output', 'output', type=click.Choice(['json']), help='Output format')
+def cli(weather, about, info, setup, output):
     "Weather from the command line"
     # setup weather
-    whtr = Weather()
+    wthr = Weather()
     # check if about
     if about:
-        print about_self()
+        print(about_self())
         sys.exit(0)
     # check if we have to setup the config file
     if setup:
@@ -344,14 +357,14 @@ def cli(weather, about, info, setup, format):
         sys.exit(0)
     # check if we have a lat and long defined on the config
     if config['geolocation']['lat'] == '' or config['geolocation']['lon'] == '':
-        ip_address = whtr.get_ip()
-        geo = whtr.get_geolocation(ip_address)
+        ip_address = wthr.get_ip()
+        geo = wthr.get_geolocation(ip_address)
     else:
         geo = config['geolocation']
     # display weather
-    whtr.api_key(config['forecast'])
-    whtr.geolocation(geo)
-    whtr.magic(weather, format)
+    wthr.api_key(config['forecast'])
+    wthr.geolocation(geo)
+    wthr.magic(weather, output)
 
 
 if __name__ == '__main__':

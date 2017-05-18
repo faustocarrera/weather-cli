@@ -24,7 +24,7 @@ class Weather(object):
     "The weather class"
 
     ip_url = 'http://ipecho.net/plain'
-    forecast_url = 'https://api.forecast.io/forecast'
+    forecast_url = 'https://api.darksky.net/forecast'
     forecast_api_key = None
     geo = None
 

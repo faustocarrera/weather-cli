@@ -52,13 +52,15 @@ weather-cli [OPTION] [FORMAT]
 
 ## Try it without installing
 
-* git clone git@github.com:faustocarrera/weather-cli.git
-* virtualenv env
-* source env/bin/activate
-* pip install -r requirements.txt
-* python weather/weather.py --setup
-* python weather/weather.py [OPTIONS] [FORMAT]
-* profit
+```
+$ git clone git@github.com:faustocarrera/weather-cli.git
+$ virtualenv env -p python2.7
+$ source env/bin/activate
+$ pip install -r requirements.txt
+$ python weather/weather.py --setup
+$ python weather/weather.py [OPTIONS] [FORMAT]
+$ profit
+```
 
 ## License
 

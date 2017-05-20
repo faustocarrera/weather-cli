@@ -1,7 +1,7 @@
 # Weather cli
 Weather from the command line, so cool!
 
-##Installation
+## Installation
 
 ```
 pip install weather-cli
@@ -66,21 +66,31 @@ MIT
 
 ## Version history
 
+**ver 1.0.1**
+
+add fix to Weather class import  
+add fix to raw_input error  
+
 **ver 1.0.0**
+
 add python3 support
 
 **ver 0.2.3**
+
 Fix weather api url
 
 **ver 0.2.1**  
+
 Replace python-geoip for geocoder library for a better geolocation   
 Enhace the setup process to be more descriptive  
 Add city name to config file  
 
 **ver 0.1.12**  
+
 add output data as json
 
 **ver 0.1.11**  
+
 small fixes  
 add new short options -n -h -f  
 add about  
@@ -88,7 +98,9 @@ add config info
 check error on setup 
 
 **ver 0.1.10**  
+
 first beta version
 
 **ver 0.1.0**  
+
 first alpha version

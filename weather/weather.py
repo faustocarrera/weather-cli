@@ -15,13 +15,14 @@ import json
 import datetime
 from tabletext import to_text
 import click
+from six.moves import input
 
 try:
     import ConfigParser as configparser
 except:
     import configparser
 
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 
 
 class Weather(object):
@@ -265,7 +266,7 @@ def setup_config():
     filename = os.path.join(script_path, 'weather.conf')
     # required parameters
     print('')
-    api_key = raw_input('Enter your forecast.io api key (required):')
+    api_key = input('Enter your forecast.io api key (required):')
     if not api_key:
         print('Sorry, the api key is required')
         print('get your api key from https://developer.forecast.io/')
@@ -278,8 +279,8 @@ def setup_config():
     print('or just avoid the IP geolocation.')
     print('Check your latitude and longitude from http://www.travelmath.com/')
     print('')
-    lat = raw_input('Enter the latitude (optional): ')
-    lon = raw_input('Enter the longitude (optional): ')
+    lat = input('Enter the latitude (optional): ')
+    lon = input('Enter the longitude (optional): ')
     # get the city name
     location = None
     if lat and lon:

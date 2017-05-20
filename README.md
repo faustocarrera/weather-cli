@@ -66,6 +66,9 @@ MIT
 
 ## Version history
 
+**ver 1.0.1**
+fix Weather import error
+
 **ver 1.0.0**
 add python3 support
 

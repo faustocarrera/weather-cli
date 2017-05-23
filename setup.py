@@ -9,7 +9,7 @@ try:
 except (IOError, ImportError):
     long_description = open('README.md').read()
 
-version = '1.0.0'
+version = '1.1.0'
 requirements = [
     'requests >= 2.4',
     'click >= 4.1',

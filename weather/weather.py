@@ -13,6 +13,7 @@ from requests.exceptions import ConnectionError
 import geocoder
 import json
 import datetime
+import time
 from tabletext import to_text
 import click
 from six.moves import input
@@ -133,8 +134,9 @@ class Weather(object):
             hourly = weather['hourly']['data']
         # current weather
         if data_type == 'now':
-            header = 'Weather in %s now' % location
-            table.append(['summary', 'temp', 'term', 'humidity'])
+            now = self.format_timestamp(weather['currently']['time'], 'datetime')
+            header = 'Weather in %s | %s' % (location, now)
+            table.append(['Summary', 'Temp', 'Term', 'Humidity'])
             table.append([weather['currently']['summary'],
                           self.format_temp(
                               weather['currently']['temperature']),
@@ -145,7 +147,7 @@ class Weather(object):
         # next 24 hours
         if data_type == 'hourly':
             header = '%s forecast next %s hours' % (location, len(hourly))
-            table.append(['day', 'summary', 'temp', 'term', 'humidity'])
+            table.append(['Day', 'Summary', 'Temp', 'Term', 'Humidity'])
             for data in hourly:
                 table.append([self.format_timestamp(data['time'], 'hour'),
                               data['summary'],
@@ -157,7 +159,7 @@ class Weather(object):
         if data_type == 'forecast':
             header = '%s forecast next %s days' % (
                 location, len(weather['daily']['data']))
-            table.append(['day', 'summary', 'min', 'max', 'humidity', 'rain'])
+            table.append(['Day', 'Summary', 'Min', 'Max', 'Humidity', 'Rain'])
             for data in weather['daily']['data']:
                 table.append([self.format_timestamp(data['time']),
                               data['summary'],
@@ -179,10 +181,14 @@ class Weather(object):
             day = date_timestamp.strftime('%A')
         # hour
         hour = date_timestamp.strftime('%H:%M')
+        # datetime
+        date_time = date_timestamp.strftime('%Y-%m-%d %H:%M:%S')
         # check type
         if data_type == 'hour':
             return hour
-        return day
+        if data_type == 'day': 
+            return day
+        return date_time
 
     @staticmethod
     def format_temp(temp):

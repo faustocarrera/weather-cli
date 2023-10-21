@@ -1,7 +1,7 @@
 [weather]
 version = 0.0.0
 [forecast]
-key = your_forecast_io_key
+key = your_pirate_weather_apiable_io_key
 [geolocation]
 location =
 latitude =

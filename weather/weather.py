@@ -31,7 +31,7 @@ class Weather(object):
     "The weather class"
 
     ip_url = 'http://ipecho.net/plain'
-    forecast_url = 'https://api.darksky.net/forecast'
+    forecast_url = 'https://api.pirateweather.net/forecast'
     forecast_api_key = None
     geo = None
 
@@ -59,7 +59,7 @@ class Weather(object):
             ))
 
     def api_key(self, forecast):
-        "set forecast.io api key"
+        "set pirate-weather.apiable.io api key"
         self.forecast_api_key = forecast['key']
 
     def geolocation(self, geo):
@@ -272,10 +272,10 @@ def setup_config():
     filename = os.path.join(script_path, 'weather.conf')
     # required parameters
     print('')
-    api_key = input('Enter your forecast.io api key (required):')
+    api_key = input('Enter your pirate-weather.apiable.io api key (required):')
     if not api_key:
         print('Sorry, the api key is required')
-        print('get your api key from https://developer.forecast.io/')
+        print('get your api key from https://pirate-weather.apiable.io/products/weather-data/')
         sys.exit(1)
     # optional parameters
     print('Warning:')

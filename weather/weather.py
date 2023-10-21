@@ -108,7 +108,7 @@ class Weather(object):
             self.forecast_api_key,
             geolocation['lat'],
             geolocation['lon'],
-            '?units=si'
+            self.units_arg
         )
         headers = {'Content-type': 'application/json'}
         # force disable insecure request warning
@@ -193,7 +193,7 @@ class Weather(object):
     @staticmethod
     def format_temp(temp):
         "format temperature"
-        return str(temp) + ' C'
+        return str(temp) + ' ' + units
 
     @staticmethod
     def format_percent(num):
@@ -229,6 +229,7 @@ def load_config():
             'key': config_parser.get('forecast', 'key'),
         },
         'geolocation': {
+            'units': config_parser.get('geolocation', 'units'),
             'location': config_parser.get('geolocation', 'location'),
             'lat': config_parser.get('geolocation', 'latitude'),
             'lon': config_parser.get('geolocation', 'longitude'),
@@ -278,6 +279,9 @@ def setup_config():
         print('get your api key from https://pirate-weather.apiable.io/products/weather-data/')
         sys.exit(1)
     # optional parameters
+    print('')
+    units = input('Enter preferred temperature degree unit (C or F): ')
+    print('')
     print('Warning:')
     print('The script will try to geolocate your IP.')
     print('If you fill the latitude and longitude, you avoid the IP geolocation.')
@@ -303,6 +307,7 @@ def setup_config():
         fconfig.write("[forecast]\n")
         fconfig.write("key = %s\n" % api_key)
         fconfig.write("[geolocation]\n")
+        fconfig.write("units = %s\n" % units)
         fconfig.write("location = %s\n" % location)
         fconfig.write("latitude = %s\n" % lat)
         fconfig.write("longitude = %s\n" % lon)
@@ -368,6 +373,13 @@ def cli(weather, about, info, setup, output):
         geo = wthr.get_geolocation(ip_address)
     else:
         geo = config['geolocation']
+    global units
+    if config['geolocation']['units'] == 'F' or config['geolocation']['units'] == 'f':
+        units          = "F"
+        wthr.units_arg = '?units=us'
+    else:
+        units          = "C"
+        wthr.units_arg = '?units=si'
     # display weather
     wthr.api_key(config['forecast'])
     wthr.geolocation(geo)

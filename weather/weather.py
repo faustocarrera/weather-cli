@@ -31,7 +31,7 @@ class Weather(object):
     "The weather class"
 
     ip_url = 'http://ipecho.net/plain'
-    forecast_url = 'https://api.darksky.net/forecast'
+    forecast_url = 'https://api.pirateweather.net/forecast'
     forecast_api_key = None
     geo = None
 
@@ -59,7 +59,7 @@ class Weather(object):
             ))
 
     def api_key(self, forecast):
-        "set forecast.io api key"
+        "set pirate-weather.apiable.io api key"
         self.forecast_api_key = forecast['key']
 
     def geolocation(self, geo):
@@ -108,7 +108,7 @@ class Weather(object):
             self.forecast_api_key,
             geolocation['lat'],
             geolocation['lon'],
-            '?units=si'
+            self.units_arg
         )
         headers = {'Content-type': 'application/json'}
         # force disable insecure request warning
@@ -193,7 +193,7 @@ class Weather(object):
     @staticmethod
     def format_temp(temp):
         "format temperature"
-        return str(temp) + ' C'
+        return str(temp) + ' ' + units
 
     @staticmethod
     def format_percent(num):
@@ -229,6 +229,7 @@ def load_config():
             'key': config_parser.get('forecast', 'key'),
         },
         'geolocation': {
+            'units': config_parser.get('geolocation', 'units'),
             'location': config_parser.get('geolocation', 'location'),
             'lat': config_parser.get('geolocation', 'latitude'),
             'lon': config_parser.get('geolocation', 'longitude'),
@@ -272,12 +273,15 @@ def setup_config():
     filename = os.path.join(script_path, 'weather.conf')
     # required parameters
     print('')
-    api_key = input('Enter your forecast.io api key (required):')
+    api_key = input('Enter your pirate-weather.apiable.io api key (required):')
     if not api_key:
         print('Sorry, the api key is required')
-        print('get your api key from https://developer.forecast.io/')
+        print('get your api key from https://pirate-weather.apiable.io/products/weather-data/')
         sys.exit(1)
     # optional parameters
+    print('')
+    units = input('Enter preferred temperature degree unit (C or F): ')
+    print('')
     print('Warning:')
     print('The script will try to geolocate your IP.')
     print('If you fill the latitude and longitude, you avoid the IP geolocation.')
@@ -303,6 +307,7 @@ def setup_config():
         fconfig.write("[forecast]\n")
         fconfig.write("key = %s\n" % api_key)
         fconfig.write("[geolocation]\n")
+        fconfig.write("units = %s\n" % units)
         fconfig.write("location = %s\n" % location)
         fconfig.write("latitude = %s\n" % lat)
         fconfig.write("longitude = %s\n" % lon)
@@ -368,6 +373,13 @@ def cli(weather, about, info, setup, output):
         geo = wthr.get_geolocation(ip_address)
     else:
         geo = config['geolocation']
+    global units
+    if config['geolocation']['units'] == 'F' or config['geolocation']['units'] == 'f':
+        units          = "F"
+        wthr.units_arg = '?units=us'
+    else:
+        units          = "C"
+        wthr.units_arg = '?units=si'
     # display weather
     wthr.api_key(config['forecast'])
     wthr.geolocation(geo)

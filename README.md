@@ -15,7 +15,7 @@ weather-cli --setup
 
 If you installed directly without using virtualenv, you have to use sudo to set it up.
 
-You gonna need a Forecast.io API key, register [here](https://developer.forecast.io/) to obtain it. You have 999 API calls per day for free, enough to check the weather a couple of times a day.
+You will need a pirate-weather.apiable.io API key, register [here](https://pirate-weather.apiable.io/products/weather-data/) to obtain it. You have 10,000 API calls per month for free, enough to check the weather a couple of times a day.
 
 You could add the latitude and logitude of the city you want to check the weather, just go to [travelmath.com](http://www.travelmath.com/) and search the city.  
 
@@ -40,7 +40,7 @@ weather-cli [OPTION] [FORMAT]
 
 ## Data sources
 
-* [Forecast.io](https://developer.forecast.io/)
+* [pirate-weather.apiable.io](https://pirate-weather.apiable.io/)
 * [GeoLite2 City MaxMin DB](http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz)
 
 

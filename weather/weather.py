@@ -13,8 +13,6 @@ from requests.exceptions import ConnectionError
 import geocoder
 import json
 import datetime
-import time
-from tabletext import to_text
 import click
 from six.moves import input
 
@@ -23,7 +21,7 @@ try:
 except:
     import configparser
 
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 
 
 class Weather(object):
@@ -42,21 +40,18 @@ class Weather(object):
         "check for weather"
         weather_data = self.get_weather()
         weather_result = self.output(
-            self.geo['location'], weather_data, data_type)
+            self.geo['location'],
+            weather_data,
+            data_type
+        )
         # print(result)
         if output == 'json':
             print(json.dumps(weather_result))
         else:
             print('')
             print(weather_result['header'])
-            print(to_text(
-                weather_result['table'],
-                header=False,
-                corners='+',
-                hor='-',
-                ver='|',
-                formats=['', '', '>', '>', '>', '>']
-            ))
+            for line in weather_result['table']:
+                print(line)
 
     def api_key(self, forecast):
         "set pirate-weather.apiable.io api key"
@@ -65,6 +60,11 @@ class Weather(object):
     def geolocation(self, geo):
         "set geolocation"
         self.geo = geo
+
+    def units(self, units):
+        "set units"
+        self.units_weather = units
+        self.units_query = '?units=us' if units.lower() == 'f' else '?units=si'
 
     def get_ip(self):
         "check the external ip"
@@ -108,7 +108,7 @@ class Weather(object):
             self.forecast_api_key,
             geolocation['lat'],
             geolocation['lon'],
-            self.units_arg
+            self.units_query
         )
         headers = {'Content-type': 'application/json'}
         # force disable insecure request warning
@@ -134,26 +134,31 @@ class Weather(object):
             hourly = weather['hourly']['data']
         # current weather
         if data_type == 'now':
-            now = self.format_timestamp(weather['currently']['time'], 'datetime')
+            now = self.format_timestamp(
+                weather['currently']['time'],
+                'datetime'
+            )
             header = 'Weather in %s | %s' % (location, now)
             table.append(['Summary', 'Temp', 'Term', 'Humidity'])
-            table.append([weather['currently']['summary'],
-                          self.format_temp(
-                              weather['currently']['temperature']),
-                          self.format_temp(
-                              weather['currently']['apparentTemperature']),
-                          self.format_percent(weather['currently']['humidity'])])
+            table.append([
+                weather['currently']['summary'],
+                self.format_temp(weather['currently']['temperature']),
+                self.format_temp(weather['currently']['apparentTemperature']),
+                self.format_percent(weather['currently']['humidity'])
+            ])
 
         # next 24 hours
         if data_type == 'hourly':
             header = '%s forecast next %s hours' % (location, len(hourly))
             table.append(['Day', 'Summary', 'Temp', 'Term', 'Humidity'])
             for data in hourly:
-                table.append([self.format_timestamp(data['time'], 'hour'),
-                              data['summary'],
-                              self.format_temp(data['temperature']),
-                              self.format_temp(data['apparentTemperature']),
-                              self.format_percent(data['humidity'])])
+                table.append([
+                    self.format_timestamp(data['time'], 'hour'),
+                    data['summary'],
+                    self.format_temp(data['temperature']),
+                    self.format_temp(data['apparentTemperature']),
+                    self.format_percent(data['humidity'])
+                ])
 
         # next few days
         if data_type == 'forecast':
@@ -161,12 +166,14 @@ class Weather(object):
                 location, len(weather['daily']['data']))
             table.append(['Day', 'Summary', 'Min', 'Max', 'Humidity', 'Rain'])
             for data in weather['daily']['data']:
-                table.append([self.format_timestamp(data['time']),
-                              data['summary'],
-                              self.format_temp(data['temperatureMin']),
-                              self.format_temp(data['temperatureMax']),
-                              self.format_percent(data['humidity']),
-                              self.format_percent(data['precipProbability'])])
+                table.append([
+                    self.format_timestamp(data['time']),
+                    data['summary'],
+                    self.format_temp(data['temperatureMin']),
+                    self.format_temp(data['temperatureMax']),
+                    self.format_percent(data['humidity']),
+                    self.format_percent(data['precipProbability'])
+                ])
         return {'header': header, 'table': table}
 
     @staticmethod
@@ -186,14 +193,13 @@ class Weather(object):
         # check type
         if data_type == 'hour':
             return hour
-        if data_type == 'day': 
+        if data_type == 'day':
             return day
         return date_time
 
-    @staticmethod
-    def format_temp(temp):
+    def format_temp(self, temp):
         "format temperature"
-        return str(temp) + ' ' + units
+        return str(temp) + ' ' + self.units_weather
 
     @staticmethod
     def format_percent(num):
@@ -211,15 +217,6 @@ def load_config():
     # load configuration
     config_parser = configparser.RawConfigParser()
     config_parser.read(filename)
-    # check configuration
-    try:
-        version = config_parser.get('weather', 'version')
-        if version != __version__:
-            reconfig(version, filename)
-            config_parser.read(filename)
-    except configparser.NoSectionError:
-        reconfig('0.0.0', filename)
-        config_parser.read(filename)
     # config
     config = {
         'weather': {
@@ -227,44 +224,15 @@ def load_config():
         },
         'forecast': {
             'key': config_parser.get('forecast', 'key'),
+            'units': config_parser.get('forecast', 'units'),
         },
         'geolocation': {
-            'units': config_parser.get('geolocation', 'units'),
             'location': config_parser.get('geolocation', 'location'),
             'lat': config_parser.get('geolocation', 'latitude'),
             'lon': config_parser.get('geolocation', 'longitude'),
         }
     }
     return config
-
-
-def reconfig(version, filename):
-    print('updating configuration...')
-    config_parser = configparser.RawConfigParser()
-    config_parser.read(filename)
-    if version == '0.0.0':
-        key = config_parser.get('forecast', 'key')
-        lat = config_parser.get('forecast', 'latitude')
-        lon = config_parser.get('forecast', 'longitude')
-        location = None
-        if lat and lon:
-            # force disable insecure request warning
-            requests.packages.urllib3.disable_warnings()
-            geo = geocoder.google([lat, lon], method='reverse')
-            location = '%s, %s' % (geo.city, geo.country)
-
-    fconfig = open(filename, 'w')
-    fconfig.write("[weather]\n")
-    fconfig.write("version = %s\n" % __version__)
-    fconfig.write("[forecast]\n")
-    fconfig.write("key = %s\n" % key)
-    fconfig.write("[geolocation]\n")
-    fconfig.write("location = %s\n" % location)
-    fconfig.write("latitude = %s\n" % lat)
-    fconfig.write("longitude = %s\n" % lon)
-    fconfig.close()
-    print('done!')
-    sys.exit()
 
 
 def setup_config():
@@ -276,7 +244,8 @@ def setup_config():
     api_key = input('Enter your pirate-weather.apiable.io api key (required):')
     if not api_key:
         print('Sorry, the api key is required')
-        print('get your api key from https://pirate-weather.apiable.io/products/weather-data/')
+        print(
+            'get your api key from https://pirate-weather.apiable.io/products/weather-data/')
         sys.exit(1)
     # optional parameters
     print('')
@@ -306,8 +275,8 @@ def setup_config():
         fconfig.write("version = %s\n" % __version__)
         fconfig.write("[forecast]\n")
         fconfig.write("key = %s\n" % api_key)
-        fconfig.write("[geolocation]\n")
         fconfig.write("units = %s\n" % units)
+        fconfig.write("[geolocation]\n")
         fconfig.write("location = %s\n" % location)
         fconfig.write("latitude = %s\n" % lat)
         fconfig.write("longitude = %s\n" % lon)
@@ -336,6 +305,7 @@ def print_config(config):
     print('Current configuration')
     print('version:   %s' % config['weather']['version'])
     print('api key:   %s' % config['forecast']['key'])
+    print('units:     %s' % config['forecast']['units'])
     print('location:  %s' % config['geolocation']['location'])
     print('latitude:  %s' % config['geolocation']['lat'])
     print('longitude: %s' % config['geolocation']['lon'])
@@ -373,16 +343,10 @@ def cli(weather, about, info, setup, output):
         geo = wthr.get_geolocation(ip_address)
     else:
         geo = config['geolocation']
-    global units
-    if config['geolocation']['units'] == 'F' or config['geolocation']['units'] == 'f':
-        units          = "F"
-        wthr.units_arg = '?units=us'
-    else:
-        units          = "C"
-        wthr.units_arg = '?units=si'
     # display weather
     wthr.api_key(config['forecast'])
     wthr.geolocation(geo)
+    wthr.units(config['forecast']['units'])
     wthr.magic(weather, output)
 
 

@@ -48,7 +48,6 @@ weather-cli [OPTION] [FORMAT]
 
 * [requests](http://docs.python-requests.org/en/latest/) >= 2.4
 * [geocoder](https://github.com/DenisCarriere/geocoder) >= 1.5
-* [tabletext](https://github.com/Thibauth/tabletext) >= 0.1
 
 ## Try it without installing
 
@@ -68,14 +67,25 @@ MIT
 
 ## Version history
 
+**ver 1.2.0**
+
+Update weather provider
+Remove the deprecated tabletext library
+
+**ver 1.1.0**
+
+Add small fixes to current weather date
+Change the table headers title case
+
+
 **ver 1.0.1**
 
-add fix to Weather class import  
-add fix to raw_input error  
+Add fix to Weather class import  
+Add fix to raw_input error  
 
 **ver 1.0.0**
 
-add python3 support
+Add python3 support
 
 **ver 0.2.3**
 
